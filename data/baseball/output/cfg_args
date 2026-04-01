@@ -1,0 +1,1 @@
+Namespace(data_device='cuda', depths='', eval=False, images='images', model_path='dataset/baseball/evlowlight/output', resolution=-1, sh_degree=3, source_path='/mnt/disk/will/dataset/gaussian-splatting/dataset/baseball/evlowlight', train_test_exp=False, white_background=False)
