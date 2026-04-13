@@ -1,80 +1,64 @@
-# Dark-EvGS
+# Dark-EvGS: Event Camera as an Eye for Radiance Field in the Dark
 
-> 本仓库用于复现作者发表于 **IEEE Transactions on Image Processing (TIP, 2026)** 的工作（作者口径）。当前仓库提供了代码、示例数据与部分已训练模型结果，重点支持**渲染复现与数据使用**。
-
----
-
-## 📌 论文信息
-
-- **论文主题**：低照度事件相机 + 高斯表示（Gaussian Splatting）相关重建/增强（对应本仓库 `Dark-EvGS`）。
-- **期刊信息**：IEEE Transactions on Image Processing (TIP), 2026（根据作者说明）。
-- **论文链接**：目前可用提交页面为（需要 arXiv 登录权限）：
-  - https://arxiv.org/submit/7472197/view
-
-> 建议后续补充公开可访问链接（如 arXiv 公开号、IEEE Xplore DOI），便于读者直接引用。
+> This repository supports reproducibility for the IEEE TIP paper **Dark-EvGS: Event Camera as an Eye for Radiance Field in the Dark**. It provides code, sample data, and selected pretrained outputs for rendering reproduction and dataset usage.
 
 ---
 
-## ✨ 仓库提供内容
+## Paper Information
 
-本仓库目前以**可复现实验资产**为主，包含：
-
-1. **渲染代码**：使用已有 3D Gaussian 模型输出渲染结果（`render.py`）。
-2. **数据转换脚本**：COLMAP 预处理脚本（`convert.py`）。
-3. **环境配置**：Conda 环境（`environment.yml`）。
-4. **示例场景数据**（`data/`）：
-   - 低照度图像序列（`low_light_frames/`）
-   - 明亮条件真值图像（`gt_bright_frames/`）
-   - 事件流（`event.npz`，通常包含 `x/y/t/p`）
-   - 部分场景带 COLMAP 稀疏重建（`sparse/0`）
-   - 部分场景带已训练模型（`output/point_cloud/...`）
+- **Title**: Dark-EvGS: Event Camera as an Eye for Radiance Field in the Dark  
+- **Authors**: Jingqian Wu, Peiqi Duan, Zongqiang Wang, Changwei Wang, Boxin Shi, Edmund Y. Lam  
+- **Venue**: IEEE Transactions on Image Processing (TIP), 2026  
+- **IEEE Xplore**: https://ieeexplore.ieee.org/abstract/document/11449405  
+- **arXiv**: https://arxiv.org/submit/7472197/view  
 
 ---
 
-## 🗂️ 数据集概览（当前仓库）
+## Repository Contents
 
-| Scene | Low-light frames | Bright GT frames | `event.npz` | `sparse/0` | `output/point_cloud` |
-|---|---:|---:|:---:|:---:|:---:|
-| badminton_down | 100 | 100 | ✅ | ✅ | ❌ |
-| baseball | 101 | 101 | ✅ | ✅ | ✅ |
-| cat | 222 | 268 | ✅ | ❌ | ❌ |
-| house | 100 | 100 | ✅ | ✅ | ✅ |
-| lion | 180 | 180 | ✅ | ✅ | ✅ |
-| panda | 120 | 120 | ✅ | ❌ | ✅ |
+This repository currently focuses on reproducibility assets:
 
-> 说明：不同场景上传内容可能不完全一致（例如部分场景缺 `sparse/0` 或 `output/point_cloud`），属于正常情况。
+1. **Rendering script**: reproduce renders from existing 3D Gaussian checkpoints (`render.py`).
+2. **COLMAP conversion script**: build COLMAP structure from custom input images (`convert.py`).
+3. **Environment file**: conda dependencies (`environment.yml`).
+4. **Sample scene data** (`data/`), including:
+   - Low-light frame sequences (`low_light_frames/`)
+   - Bright-condition ground-truth frames (`gt_bright_frames/`)
+   - Event streams (`event.npz`, typically with `x/y/t/p`)
+   - Optional COLMAP sparse outputs (`sparse/0`)
+   - Optional pretrained model outputs (`output/point_cloud/...`)
 
 ---
 
-## 🚀 快速开始
+## Quick Start
 
-### 1) 环境安装
+### 1) Environment Setup
 
 ```bash
 conda env create -f environment.yml
 conda activate gaussian_splatting
 ```
 
-### 2) 使用已有 checkpoint 进行渲染复现
+### 2) Reproduce Rendering from a Provided Checkpoint
 
-以 `lion` 场景为例：
+Using the `lion` scene as an example:
 
 ```bash
 python render.py -m data/lion/output
 ```
 
-渲染结果默认保存到：
+Default output folders:
 
 - `data/lion/output/train/ours_<iter>/renders`
 - `data/lion/output/test/ours_<iter>/renders`
 
-可选参数：
+Useful options:
 
-- `--iteration <int>`：指定加载迭代（默认 `-1` 表示最新）
-- `--skip_train`：仅渲染测试集
-- `--skip_test`：仅渲染训练集
+- `--iteration <int>`: load a specific iteration (`-1` for latest)
+- `--skip_train`: render test split only
+- `--skip_test`: render train split only
 
-示例（只渲染 test）：
+Example (test split only):
 
 ```bash
 python render.py -m data/lion/output --skip_train
@@ -82,23 +66,23 @@ python render.py -m data/lion/output --skip_train
 
 ---
 
-## 🧪 数据读取说明
+## Data Usage
 
-### 图像序列
+### Frame Sequences
 
-- 低照度输入：`data/<scene>/low_light_frames/*.png`
-- 明亮 GT：`data/<scene>/gt_bright_frames/*.png`
+- Low-light input frames: `data/<scene>/low_light_frames/*.png`
+- Bright GT frames: `data/<scene>/gt_bright_frames/*.png`
 
-### 事件流（`event.npz`）
+### Event Stream (`event.npz`)
 
-通常包含以下键：
+Typical keys:
 
-- `x`：像素横坐标
-- `y`：像素纵坐标
-- `t`：时间戳
-- `p`：极性（正/负事件）
+- `x`: pixel x-coordinate
+- `y`: pixel y-coordinate
+- `t`: timestamp
+- `p`: event polarity
 
-示例读取：
+Example:
 
 ```python
 import numpy as np
@@ -110,28 +94,32 @@ print(x.shape, y.shape, t.shape, p.shape)
 
 ---
 
-## 🛠️ 从自有数据构建 COLMAP 输入（可选）
+## Build COLMAP Inputs from Your Own Data (Optional)
 
-如果你希望将自己的多视角图像整理成该仓库可用格式，可使用：
+If you want to process your own multi-view images into this repo format:
 
 ```bash
 python convert.py -s <your_scene_path>
 ```
 
-其中 `<your_scene_path>` 目录下建议包含 `input/` 图像目录。脚本会调用 COLMAP 进行特征提取、匹配、稀疏重建与去畸变，并整理到 `sparse/0`。
+Expected input:
+
+- `<your_scene_path>/input/` containing images.
+
+The script runs COLMAP feature extraction, matching, sparse reconstruction, and undistortion, then arranges outputs into `sparse/0`.
 
 ---
 
-## 🖼️ 可视化示例（仓库内样例）
+## Visualization Examples (In-Repo Samples)
 
-### Lion 场景（低照度 vs 明亮 GT）
+### Lion Scene (Low-light vs Bright GT)
 
 | Low-light | Bright GT |
 |---|---|
 | ![lion-low](data/lion/low_light_frames/000013.png) | ![lion-gt](data/lion/gt_bright_frames/000013.png) |
 | ![lion-low](data/lion/low_light_frames/000079.png) | ![lion-gt](data/lion/gt_bright_frames/000079.png) |
 
-### House 场景（低照度 vs 明亮 GT）
+### House Scene (Low-light vs Bright GT)
 
 | Low-light | Bright GT |
 |---|---|
@@ -139,7 +127,7 @@ python convert.py -s <your_scene_path>
 
 ---
 
-## 📁 推荐目录组织（单场景）
+## Recommended Per-Scene Directory Structure
 
 ```text
 data/<scene>/
@@ -157,20 +145,22 @@ data/<scene>/
 
 ---
 
-## 📬 引用与致谢
+## Citation
 
-如果你在研究中使用了本仓库，请在你的论文中引用对应 TIP 文章（待补充正式 BibTeX / DOI / arXiv 公开号）。
+If you find this repository useful in your research, please cite:
 
-同时，本仓库代码结构继承/参考了 3D Gaussian Splatting 社区实现；如用于学术研究，也请同时引用相关基础工作。
+```bibtex
+@article{wu2026dark,
+  title={Dark-EvGS: Event camera as an eye for radiance field in the dark},
+  author={Wu, Jingqian and Duan, Peiqi and Wang, Zongqiang and Wang, Changwei and Shi, Boxin and Lam, Edmund Y},
+  journal={IEEE Transactions on Image Processing},
+  year={2026},
+  publisher={IEEE}
+}
+```
 
 ---
 
-## ❓你可以补充给我的信息（我可继续帮你完善）
+## Acknowledgement
 
-如果你愿意，我可以下一步直接把 README 升级成“投稿级别”版本（含中英双语摘要、BibTeX、FAQ、复现实验表格、常见报错），你只需补充：
-
-1. 论文**正式标题**（中/英文）
-2. 作者列表与单位
-3. 公开论文链接（arXiv ID 或 IEEE Xplore DOI）
-4. 是否需要加入 benchmark 数值（PSNR/SSIM/LPIPS 等）
-5. 许可证与数据使用声明（如仅科研用途）
+This repository builds on the 3D Gaussian Splatting ecosystem. Please also cite foundational related work when appropriate.
